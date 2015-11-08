@@ -1,4 +1,4 @@
-import utils.primo_utils as primo_utils
+import utils.primo_utils_batch as primo_utils
 import utils.repo as repo
 
 if __name__ == '__main__':
