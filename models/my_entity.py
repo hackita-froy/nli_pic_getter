@@ -7,7 +7,7 @@ class MyEntity:
     def __init__(self, ie_id, title):
         self.ie_id = ie_id
         self.title = title
-        self.files_ids = get_files_ids()
+        self.files_ids = get_files_ids(self)
 
 
 def get_files_ids(self):

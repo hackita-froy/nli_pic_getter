@@ -1,8 +1,12 @@
-import lxml.etree as etree
-import suds.client as suds_client
 import sys
+import os
 
-ROSETTA_WSDL_URL = 'http://rosetta.nli.org.il/dpsws/delivery/DeliveryAccessWS?wsdl'
+import lxml.etree as etree
+import suds
+import suds.client as suds_client
+
+
+ROSETTA_WSDL_URL = os.environ['ROSETTA_WSDL_URL']
 FILE_ID_ATTR = 'FILEID'
 
 
@@ -15,9 +19,14 @@ def get_rosetta_delivery_service():
 def get_entity_file_ids(ie_id):
     ns = {'mets': 'http://www.loc.gov/METS/'}
     fl_list = []
-    result = get_rosetta_delivery_service().getIE(ie_id)
+    try:
+        result = get_rosetta_delivery_service().getIE(ie_id)
+    except suds.WebFault as e :
+        print('an web error happend, entity not retrieved')
+        print(e)
+
     tree = etree.fromstring(result)
-    fptr_elements = tree.findall('.//mets:structMap[0]//mets:fptr', ns)
+    fptr_elements = tree.findall('.//mets:structMap[1]//mets:fptr', ns)
     for element in fptr_elements:
         fl_list.append(element.get(FILE_ID_ATTR))
 
