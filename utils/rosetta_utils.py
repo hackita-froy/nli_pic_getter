@@ -1,4 +1,3 @@
-import lxml.objectify as objectify
 import lxml.etree as etree
 import suds.client as suds_client
 import sys
@@ -18,9 +17,9 @@ def get_entity_file_ids(ie_id):
     fl_list = []
     result = get_rosetta_delivery_service().getIE(ie_id)
     tree = etree.fromstring(result)
-    fptr_elements = tree.findall('.//mets:structMap[1]//mets:fptr', ns)
+    fptr_elements = tree.findall('.//mets:structMap[0]//mets:fptr', ns)
     for element in fptr_elements:
-        fl_list.append(element.get(FILE_ID_ATTR)) f
+        fl_list.append(element.get(FILE_ID_ATTR))
 
     return fl_list
 
