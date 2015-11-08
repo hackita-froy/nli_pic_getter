@@ -2,6 +2,7 @@
 
 ## Usage
 1. clone the repository
+2. add enviroment variables as per comment in trello
 2. $ cd nli_pic_getter
 3. $ python pic_getter.py
 
