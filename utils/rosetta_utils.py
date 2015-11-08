@@ -9,31 +9,30 @@ import suds.client as suds_client
 ROSETTA_WSDL_URL = os.environ['ROSETTA_WSDL_URL']
 FILE_ID_ATTR = 'FILEID'
 
-
+""" Return suds client """
 def get_rosetta_client():
     return suds_client.Client(ROSETTA_WSDL_URL)
 
+""" Return suds client.service """
 def get_rosetta_delivery_service():
     return get_rosetta_client().service
 
+""" Return list of all FL asosciated with IE """
 def get_entity_file_ids(ie_id):
     ns = {'mets': 'http://www.loc.gov/METS/'}
     fl_list = []
     try:
         result = get_rosetta_delivery_service().getIE(ie_id)
+        tree = etree.fromstring(result)
+        fptr_elements = tree.findall('.//mets:structMap[1]//mets:fptr', ns)
+        for element in fptr_elements:
+            fl_list.append(element.get(FILE_ID_ATTR))
+
+        return fl_list
     except suds.WebFault as e :
         print('an web error happend, entity not retrieved')
         print(e)
-
-    tree = etree.fromstring(result)
-    fptr_elements = tree.findall('.//mets:structMap[1]//mets:fptr', ns)
-    for element in fptr_elements:
-        fl_list.append(element.get(FILE_ID_ATTR))
-
-    return fl_list
-
-
-
+        return
 
 if __name__ == '__main__':
     ie_id = ''

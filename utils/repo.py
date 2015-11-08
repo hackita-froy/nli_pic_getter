@@ -4,7 +4,7 @@ import urllib.request
 USER_HOME = os.path.expanduser("~")
 ROOT_IMAGE_PATH = os.path.join(USER_HOME, "nli_images")
 
-
+""" Creates and saves IE images in IE folder  """
 def save_enteties_files(enteties):
 
     for entity in enteties:
@@ -13,3 +13,5 @@ def save_enteties_files(enteties):
         for file in entity.file_ids:
             urllib.request.urlretrieve("http://rosetta.nli.org.il/delivery/DeliveryManagerServlet?dps_pid={0}&dps_func=stream"
                                        .format(file), entity_path+"/{0}.jpg".format(file))
+            with open(entity_path+"/title.text", "w") as text_file:
+                text_file.write(entity.title)
