@@ -1,21 +1,19 @@
 import math
 import re
 from collections import deque
+import os
 
 import lxml.etree as etree
 import requests
 
 import models.my_entity as my_entity
 
-ENTITY_SEARCH_URL = 'http://primo.nli.org.il/PrimoWebServices/xservice/search/brief?institution=NNL_PIC_ALBUM&loc=local,scope:(NNL01_Schwad)&query=any,contains,NNL01_Schwad&sortField=&indx={0}&bulkSize={1}'
-
-
 entity_list_size = 0
 ns = {'primoBib': 'http://www.exlibrisgroup.com/xsd/primo/primo_nm_bib',
         'sears': 'http://www.exlibrisgroup.com/xsd/jaguar/search'}
 
 def get_entities_xml_string(index=1, bulk_size=1000):
-    return requests.get(ENTITY_SEARCH_URL.format(index, bulk_size)).content
+    return requests.get(os.environ['ENTITY_SEARCH_URL'].format(index, bulk_size)).content
 
 def get_entity_number():
     tree = get_entity_tree(1,1)
@@ -23,7 +21,7 @@ def get_entity_number():
 
 
 def get_entity_tree(index=1, bulk_size=1000):
-    reponse = requests.get(ENTITY_SEARCH_URL.format(index, bulk_size)).content
+    reponse = requests.get(os.environ['ENTITY_SEARCH_URL'].format(index, bulk_size)).content
     return etree.fromstring(reponse)
 
 def create_entity_que(num=get_entity_number()):
