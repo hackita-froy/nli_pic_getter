@@ -1,12 +1,13 @@
 import logging
 import os
-import json
+import simplejson as json
 from multiprocessing.pool import Pool
 
 from pathlib import Path
 from PIL import Image
 
 from models import my_entity
+from utils.my_json_encoder import CustomTypeEncoder, CustomTypeDecoder
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -34,14 +35,14 @@ def verify_ie_folders(ie_folder_root_path):
     ie_folders = Path(ie_folder_root_path)
     corrupt_file_count = 0
     entities = []
-    file_ids = []
+    # file_ids = []
 
     try:
         with (ie_folders / "corrupt_file_list.txt").open('w') as f:
             for folder in ie_folders.iterdir():
                 if folder.is_file():
                     continue
-
+                file_ids = []
                 for item in folder.iterdir():
                     if item.is_file() and item.suffix == ".jpg":
                         try:
@@ -58,12 +59,13 @@ def verify_ie_folders(ie_folder_root_path):
                 if file_ids:
                     entity = my_entity.MyEntity(ie_id=item.parent.stem, file_ids=file_ids)
                     entities.append(entity)
-                file_ids = []
+
 
     finally:
         if entities:
-            print("Fixing corrupt files")
-            # save_entities_files(entities)
+            with (ie_folders / "corrupt_files.json").open('w') as file:
+                json.dump(entities, file, cls=CustomTypeEncoder, indent=2)
+            print("Dumped json")
 
         entities = []
         print("Number of corrupt files is: {0}".format(corrupt_file_count))
