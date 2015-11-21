@@ -1,7 +1,9 @@
+import logging
 import sys
 import os
 import re
 from collections import deque
+from multiprocessing.pool import Pool
 
 import lxml.etree as etree
 import requests
@@ -9,7 +11,10 @@ import requests
 import models.my_entity as my_entity
 
 ENTITY_SEARCH_URL = os.environ['ENTITY_SEARCH_URL']
+POOL_NUMBER = 10
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 entity_list_size = 0
 ns = {'primoBib': 'http://www.exlibrisgroup.com/xsd/primo/primo_nm_bib',
@@ -26,33 +31,37 @@ def get_entity_number():
 
 """ Return lxml.etree tree representing the xml response from primo """
 def get_entity_tree(index=1):
-    reponse = requests.get(ENTITY_SEARCH_URL % index).content
-    return etree.fromstring(reponse)
+    try:
+        reponse = requests.get(ENTITY_SEARCH_URL.format(index, 1)).content
+        return etree.fromstring(reponse)
+    except ConnectionError as e :
+        logger.error(e)
+
 
 """ Return a dque of model.my_entity.MyEntity of all Schwadron IEs """
 def create_entity_que(num=get_entity_number()):
-    intelectual_entities = deque()
-    entity_num = num
-    regex = 'IE[0-9]{1,20}'
-
-    for i in range(1, num):
-        global ns
-        tree = get_entity_tree(i)
-        doc = tree.findall('.//sears:DOCSET/sears:DOC', ns)[0]
-        title = doc.find('.//primoBib:title', ns).text
-
-        if re.search(regex, doc.find('.//primoBib:linktorsrc', ns).text) is None:
-
-            continue
-
-        ie_id = re.search(regex, doc.find('.//primoBib:linktorsrc', ns).text).group()
-        print("initializing {0}".format(ie_id))
-        entity = my_entity.MyEntity(ie_id, title)
-        intelectual_entities .append(entity)
+    pool = Pool(processes=POOL_NUMBER)
+    intelectual_entities = pool.map(get_entity, range(1, num))
 
     return intelectual_entities
 
 
 
-# TODO: get all IE's from shvadron as array of strings ['IE1', 'IE2',...,IEn]
+""" Return a dque of model.my_entity.MyEntity of all Schwadron IEs """
+def get_entity(index):
+    regex = 'IE[0-9]{1,20}'
 
+    global ns
+    tree = get_entity_tree(index)
+    doc = tree.findall('.//sears:DOCSET/sears:DOC', ns)[0]
+    title = doc.find('.//primoBib:title', ns).text
+
+    if re.search(regex, doc.find('.//primoBib:linktorsrc', ns).text) is None:
+
+        return
+
+    ie_id = re.search(regex, doc.find('.//primoBib:linktorsrc', ns).text).group()
+    entity = my_entity.MyEntity(ie_id=ie_id, title=title)
+    logger.info("initialized {0}".format(ie_id))
+
+    return entity
