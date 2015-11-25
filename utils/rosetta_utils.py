@@ -1,3 +1,4 @@
+import logging
 import sys
 import os
 
@@ -5,6 +6,8 @@ import lxml.etree as etree
 import suds
 import suds.client as suds_client
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 ROSETTA_WSDL_URL = os.environ['ROSETTA_WSDL_URL']
 FILE_ID_ATTR = 'FILEID'
@@ -30,8 +33,8 @@ def get_entity_file_ids(ie_id):
 
         return fl_list
     except suds.WebFault as e :
-        print('an web error happend, entity not retrieved')
-        print(e)
+        logger.error('an web error happend, entity not retrieved')
+        logger.error(e)
         return
 
 if __name__ == '__main__':
@@ -44,7 +47,7 @@ if __name__ == '__main__':
     else:
         sys.exit("you must supply an IE ID as the first argument")
 
-    print(file_ids)
+    logger.info(file_ids)
 
 
 
