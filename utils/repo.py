@@ -1,31 +1,33 @@
 import logging
 import os
-import simplejson as json
 from multiprocessing.pool import Pool
-
 from pathlib import Path
+
+import simplejson as json
 from PIL import Image
+from pydblite import Base
 
 from models import my_entity
-from utils.my_json_encoder import CustomTypeEncoder, CustomTypeDecoder
+from utils.my_json_encoder import CustomTypeEncoder
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 USER_HOME = os.path.expanduser("~")
-ROOT_IMAGE_PATH = os.path.join(USER_HOME, "nli_images")
+SCHW_ROOT_IMAGE_PATH = os.path.join(USER_HOME, "nli_images")
 POOL_NUMBER = 10
 
 
-def save_entities_files(enteties):
+
+def save_entities_files(enteties, dest_dir):
     """ Creates and saves IE images in IE folder  """
     pool = Pool(processes=POOL_NUMBER)
-    pool.map(save_entity, enteties)
+    pool.map(save_entity_to_disk, enteties, dest_dir)
 
-def save_entity(entity):
+def save_entity_to_disk(entity, dest_dir=SCHW_ROOT_IMAGE_PATH):
     """ Creates and saves IE images in IE folder  """
     if entity:
-        entity_path = os.path.join(ROOT_IMAGE_PATH, entity.ie_id)
+        entity_path = os.path.join(dest_dir, entity.ie_id)
         os.makedirs(entity_path, exist_ok=True)
         entity.save_files(entity_path)
 

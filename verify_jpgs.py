@@ -5,7 +5,7 @@ import click
 from utils import repo
 
 logging.basicConfig(level=logging.INFO)
-DEFAULT_PATH = repo.ROOT_IMAGE_PATH
+DEFAULT_PATH = repo.SCHW_ROOT_IMAGE_PATH
 
 
 @click.command()
