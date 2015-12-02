@@ -2,7 +2,9 @@ import logging
 import sys
 import os
 import re
+import pdb
 from collections import deque
+from functools import partial
 from multiprocessing.pool import Pool
 
 import lxml.etree as etree
@@ -11,6 +13,7 @@ import requests
 import models.my_entity as my_entity
 
 ENTITY_SEARCH_URL = os.environ['ENTITY_SEARCH_URL']
+
 POOL_NUMBER = 10
 
 logging.basicConfig(level=logging.INFO)
@@ -30,29 +33,32 @@ def get_entity_number():
     return int(tree.findall('.//sears:DOCSET', ns)[0].get('TOTALHITS'))
 
 """ Return lxml.etree tree representing the xml response from primo """
-def get_entity_tree(index=1):
+def get_entity_tree(search_url=ENTITY_SEARCH_URL, index=1):
     try:
-        reponse = requests.get(ENTITY_SEARCH_URL.format(index, 1)).content
+        logger.info("getting entity tree from {}".format(search_url))
+        reponse = requests.get(search_url.format(index, 1)).content
         return etree.fromstring(reponse)
     except ConnectionError as e :
         logger.error(e)
 
 
 """ Return a dque of model.my_entity.MyEntity of all Schwadron IEs """
-def create_entity_que(num=get_entity_number()):
+def create_entity_que(search_url, num):
+    func = partial(get_entity, search_url)
     pool = Pool(processes=POOL_NUMBER)
-    intelectual_entities = pool.map(get_entity, range(1, num))
+    intelectual_entities = pool.map(func, range(1, num))
 
     return intelectual_entities
 
 
 
 """ Return a dque of model.my_entity.MyEntity of all Schwadron IEs """
-def get_entity(index):
+def get_entity(search_url, index):
+    assert search_url
     regex = 'IE[0-9]{1,20}'
 
     global ns
-    tree = get_entity_tree(index)
+    tree = get_entity_tree(search_url, index)
     doc = tree.findall('.//sears:DOCSET/sears:DOC', ns)[0]
     title = doc.find('.//primoBib:title', ns).text
 

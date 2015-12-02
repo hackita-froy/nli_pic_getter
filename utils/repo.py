@@ -2,6 +2,7 @@ import logging
 import os
 from multiprocessing.pool import Pool
 from pathlib import Path
+from functools import partial
 
 import simplejson as json
 from PIL import Image
@@ -21,10 +22,11 @@ POOL_NUMBER = 10
 
 def save_entities_files(enteties, dest_dir):
     """ Creates and saves IE images in IE folder  """
+    func = partial(save_entity_to_disk, dest_dir)
     pool = Pool(processes=POOL_NUMBER)
-    pool.map(save_entity_to_disk, enteties, dest_dir)
+    pool.map(func, enteties)
 
-def save_entity_to_disk(entity, dest_dir=SCHW_ROOT_IMAGE_PATH):
+def save_entity_to_disk(dest_dir=SCHW_ROOT_IMAGE_PATH, entity=None):
     """ Creates and saves IE images in IE folder  """
     if entity:
         entity_path = os.path.join(dest_dir, entity.ie_id)
