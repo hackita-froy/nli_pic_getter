@@ -5,8 +5,8 @@ import sys
 import utils.primo_utils as primo_utils
 import utils.repo as repo
 
-def main(dest_dir=repo.SCHW_ROOT_IMAGE_PATH):
-    search_url = primo_utils.ENTITY_SEARCH_URL
+def main(dest_dir=repo.ZALMANIA_IMAGE_PATH):
+    search_url = primo_utils.ZALMANIA_ENTITY_SEARCH_URL
     entity_num = primo_utils.get_entity_number(search_url)
     entities = primo_utils.create_entity_que(search_url, entity_num)
     repo.save_entities_files(entities, dest_dir)

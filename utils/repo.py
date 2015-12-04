@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 USER_HOME = os.path.expanduser("~")
 SCHW_ROOT_IMAGE_PATH = os.path.join(USER_HOME, "nli_images")
+ZALMANIA_IMAGE_PATH = os.path.join(USER_HOME, "zalmania_images")
 POOL_NUMBER = 10
 
 
