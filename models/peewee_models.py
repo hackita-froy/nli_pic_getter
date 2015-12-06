@@ -20,4 +20,4 @@ class Portrait(BaseModel):
     file_name = peewee.CharField(null=False, index=True)
     entity_id = peewee.CharField(null=False, index=True)
     image_path = peewee.CharField(null=False)
-    portraite_bounding_box = peewee.BlobField()
+    portraite_bounding_box = peewee.BlobField(null=True)

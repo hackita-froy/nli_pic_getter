@@ -1,15 +1,19 @@
 import logging
 import os
+import pickle
 from multiprocessing.pool import Pool
 from pathlib import Path
 from functools import partial
 
 import simplejson as json
 from PIL import Image
-from pydblite import Base
+
 
 from models import my_entity
+from models.peewee_models import Portrait
+from peewee import DatabaseError, DataError, IntegrityError,InterfaceError, NotSupportedError
 from utils.my_json_encoder import CustomTypeEncoder
+from utils  import my_text_utils
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -19,7 +23,7 @@ SCHW_ROOT_IMAGE_PATH = os.path.join(USER_HOME, "nli_images")
 ZALMANIA_IMAGE_PATH = os.path.join(USER_HOME, "zalmania_images")
 POOL_NUMBER = 10
 
-
+Portrait.create_table(True)
 
 def save_entities_files(enteties, dest_dir):
     """ Creates and saves IE images in IE folder  """
@@ -75,3 +79,17 @@ def verify_ie_folders(ie_folder_root_path):
         entities = []
         print("Number of corrupt files is: {0}".format(corrupt_file_count))
 
+
+def save_portrait_to_db(path_to_image, bounding_box=(0,0,0,0)):
+    entity_id, file_name = my_text_utils.entity_file_from_path(path_to_image)
+    pickled = pickle.dumps(bounding_box, protocol=pickle.HIGHEST_PROTOCOL)
+    try:
+        Portrait.create(file_name=file_name, entity_id=entity_id, image_path=path_to_image, portraite_bounding_box=pickled)
+    except IntegrityError as e:
+        logger.error(e)
+    except DatabaseError as e:
+        logger.error(e)
+    except DataError as e:
+        logger.error(e)
+    finally:
+        pass #TODO: decide what to do finally
