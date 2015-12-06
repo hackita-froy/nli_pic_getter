@@ -5,7 +5,7 @@ import sys
 import utils.primo_utils as primo_utils
 import utils.repo as repo
 
-def main(dest_dir=repo.ZALMANIA_IMAGE_PATH):
+def get_entity_files(dest_dir=repo.ZALMANIA_IMAGE_PATH):
     search_url = primo_utils.ZALMANIA_ENTITY_SEARCH_URL
     entity_num = primo_utils.get_entity_number(search_url)
     entities = primo_utils.create_entity_que(search_url, entity_num)
@@ -21,4 +21,4 @@ if __name__ == '__main__':
     print ("displays number of files and total size of files per extension in the specified path.")
     sys.exit()
   else:
-    main(sys.argv[1])
+    get_entity_files(sys.argv[1])
